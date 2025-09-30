@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Слово дня — Англійська (MVP)</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --card:#ffffff;
+    --muted:#64748b;
+    --accent:#0ea5e9; 
+    --good:#10b981;   
+    --bad:#ef4444;    
+    --yellow:#f59e0b; 
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%;margin:0;background:
+    radial-gradient(circle at 10% 10%, rgba(14,165,233,0.06), transparent 10%),
+    linear-gradient(180deg,#f1f5f9 0%, #e6eef8 100%);
+    color:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:28px auto;padding:18px}
+  .header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .logo{
+    width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#06b6d4);
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;box-shadow:0 8px 30px rgba(14,165,233,0.12)
+  }
+  h1{margin:0;font-size:20px}
+  p.lead{margin:2px 0 0;color:var(--muted);font-size:14px}
+  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 18px 50px rgba(15,23,42,0.06)}
+  .grid{display:grid;grid-template-columns:1fr 340px;gap:16px}
+  @media (max-width:880px){ .grid{grid-template-columns:1fr;}}
+  .panel{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,252,0.9));border:1px solid #eef4fb}
+  .muted{color:var(--muted);font-size:13px}
+  .wordRow{display:flex;align-items:center;gap:12px}
+  .word{font-size:28px;font-weight:800}
+  .transcr{color:var(--muted);font-weight:600;margin-left:6px}
+  .example{margin-top:10px;color:#0f172a}
+  .example-trans{margin-top:6px;color:var(--muted);font-size:14px}
+  .controls{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  
+  .btn {
+    border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;
+    box-shadow:0 6px 18px rgba(14,165,233,0.08);
+  }
+  .btn-green{background:var(--good);color:white}
+  .btn-accent{background:var(--accent);color:white}
+  .btn-yellow{background:var(--yellow);color:white}
+  .btn-ghost{background:#eef6fb;color:var(--bg);box-shadow:none;border:1px solid #e6f0f7}
+  .smallbtn{background:#f1f5f9;color:var(--bg);padding:6px 10px;border-radius:8px;border:1px solid #e6eef8}
+  .btn-red{background:var(--bad);color:white}
+  .stats{font-weight:600;margin-top:8px}
+  .question{margin:12px 0;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fbfdff,#ffffff);border:1px solid #eef6ff}
+  input[type=text]{padding:10px;border-radius:8px;border:1px solid #e6eef8;width:100%;font-size:14px}
+  .correct{color:var(--good);font-weight:700}
+  .wrong{color:var(--bad);font-weight:700}
+  .hint{margin-top:8px;color:var(--muted);font-size:14px}
+  .feedback{margin-top:10px;padding:12px;border-radius:8px;background:linear-gradient(90deg, rgba(16,185,129,0.03), rgba(239,68,68,0.02));}
+  .opt{padding:8px;border-radius:8px;border:1px solid #eef2ff;margin-top:6px}
+  .opt input{margin-right:8px}
+  .correct-badge{display:inline-block;padding:6px 8px;background:rgba(16,185,129,0.12);color:var(--good);border-radius:8px;font-weight:700;margin-left:8px}
+  .wrong-badge{display:inline-block;padding:6px 8px;background:rgba(239,68,68,0.08);color:var(--bad);border-radius:8px;font-weight:700;margin-left:8px}
+  footer{margin-top:14px;color:var(--muted);font-size:13px}
+  .result-line{margin-top:10px;font-weight:700}
+  .highlight-wrong{outline: 3px solid rgba(239,68,68,0.12);border-radius:8px;padding:6px}
+  .highlight-correct{outline: 3px solid rgba(16,185,129,0.12);border-radius:8px;padding:6px}
+  /* analysis panel */
+  #analysisPanel{display:none;margin-top:12px;padding:12px;border-radius:10px;background:#f8fafc;border:1px solid #e6eef8}
+  #analysisPanel h4{margin:0 0 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">EN</div>
+    <div>
+      <h1>Слово дня — Англійська </h1>
+      <p class="lead">Кожен день, нове слово - Англійська</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div>
+        <div class="panel" id="wordPanel">
+          <div class="muted">Слово дня</div>
+          <div class="wordRow" style="margin-top:8px">
+            <div>
+              <div class="word" id="wordText">—</div>
+              <div class="transcr" id="wordTranscr">—</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button id="speakBtn" class="btn btn-accent">🔊 Послухати</button>
+              <button id="testBtn" class="btn btn-green">✅ Пройти тест</button>
+            </div>
+          </div>
+
+          <div class="example" id="wordExample">—</div>
+          <div class="example-trans" id="wordExampleTrans">—</div>
+          <div class="muted" id="wordTranslation">—</div>
+
+          <div class="controls">
+            
+            <button id="repeatBtn" class="btn btn-accent">🔁 Додати в повторення</button>
+            
+            <button id="showRepeats" class="btn btn-red">🛑 Слова для повторення</button>
+          </div>
+        </div>
+
+        <div id="testArea" style="display:none;margin-top:14px">
+          <div class="panel">
+            <h3 style="margin:0 0 6px">Тест — 2 питання</h3>
+            <div id="questions"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+              <button id="submitTest" class="btn btn-accent">Перевірити</button>
+              <button id="cancelTest" class="smallbtn">Скасувати</button>
+            </div>
+            <div id="resultArea"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="muted">Твоя статистика</div>
+          <div class="stats" id="statsBox">
+            Тести пройдено: 0<br>
+            % правильних відповідей: 0%<br>
+            Слів для повторення: 0
+          </div>
+          <div style="margin-top:12px">
+            
+            <button id="resetStats" class="btn btn-red">🗑️ Скинути статистику</button>
+          </div>
+
+          
+          <div style="margin-top:12px">
+            <button id="showAnalysisBtn" class="btn btn-yellow" style="display:none">🔍 Показати розбір</button>
+          </div>
+
+          <div style="margin-top:14px" id="repeatsList"></div>
+        </div>
+
+        <div style="margin-top:14px" class="panel">
+          <div class="muted">Порада для користувача</div>
+          <ul style="margin:8px 0 0 18px;color:var(--muted)">
+            <li>Якщо щось не виходить,не засмучуйся.</li>
+            <li>Помилки це нормально,головне практика.</li>
+          </ul>
+        </div>
+
+        
+        <div id="analysisPanel" style="margin-top:14px" class="panel">
+          <h4>Розбір відповідей</h4>
+          <div id="analysisContent"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer>
+      <small>Всі дані зберігаються локально в браузері. Щоб синхронізувати між пристроями — додати сервер/обліковки.</small>
+    </footer>
+  </div>
+</div>
+
+<script>
+
+const WORDS = [
+  {word:'apple', transcr:'ˈæpəl', translation:'яблуко', example:'I ate a red apple after school.', exampleTrans:'Я з’їв червоне яблуко після школи.', level:'A1'},
+  {word:'book', transcr:'bʊk', translation:'книга', example:'She opened the book and read the first page.', exampleTrans:'Вона відкрила книгу і прочитала першу сторінку.', level:'A1'},
+  {word:'school', transcr:'skuːl', translation:'школа', example:'He goes to school by bus every day.', exampleTrans:'Він їздить до школи автобусом щодня.', level:'A1'},
+  {word:'friend', transcr:'frɛnd', translation:'друг', example:'My friend called me yesterday.', exampleTrans:'Мій друг подзвонив мені вчора.', level:'A1'},
+  {word:'family', transcr:'ˈfæməli', translation:'сімʼя', example:'We visit our family on Sundays.', exampleTrans:'Ми відвідуємо нашу сімʼю по неділях.', level:'A1'},
+  {word:'learn', transcr:'lɜːrn', translation:'вчити(ся)', example:'I want to learn new words.', exampleTrans:'Я хочу вивчати нові слова.', level:'A1'},
+  {word:'study', transcr:'ˈstʌdi', translation:'вчитися, вивчати', example:'They study English every evening.', exampleTrans:'Вони вивчають англійську кожного вечора.', level:'A1'},
+  {word:'teacher', transcr:'ˈtiːtʃər', translation:'вчитель', example:'The teacher explained the rule clearly.', exampleTrans:'Вчитель чітко пояснив правило.', level:'A1'},
+  {word:'home', transcr:'hoʊm', translation:'дім', example:'I am happy to be home.', exampleTrans:'Я радий бути вдома.', level:'A1'},
+  {word:'play', transcr:'pleɪ', translation:'грати', example:'Children play in the park.', exampleTrans:'Діти грають в парку.', level:'A1'},
+  {word:'happy', transcr:'ˈhæpi', translation:'щасливий', example:'She is happy today.', exampleTrans:'Вона сьогодні щаслива.', level:'A1'},
+  {word:'important', transcr:'ɪmˈpɔːrtənt', translation:'важливий', example:'This homework is important.', exampleTrans:'Це домашнє завдання важливе.', level:'A2'},
+  {word:'question', transcr:'ˈkwɛstʃən', translation:'питання', example:'Do you have a question?', exampleTrans:'У вас є питання?', level:'A1'},
+  {word:'answer', transcr:'ˈænsər', translation:'відповідь', example:'He knows the answer.', exampleTrans:'Він знає відповідь.', level:'A1'},
+  {word:'listen', transcr:'ˈlɪsən', translation:'слухати', example:'Listen to the teacher carefully.', exampleTrans:'Уважно слухайте вчителя.', level:'A1'},
+  {word:'speak', transcr:'spiːk', translation:'говорити', example:'Please speak slowly.', exampleTrans:'Будь ласка, говоріть повільніше.', level:'A1'},
+  {word:'write', transcr:'raɪt', translation:'писати', example:'Write your name here.', exampleTrans:'Напишіть своє імʼя тут.', level:'A1'},
+  {word:'read', transcr:'riːd', translation:'читати', example:'I like to read books.', exampleTrans:'Мені подобається читати книги.', level:'A1'},
+  {word:'help', transcr:'hɛlp', translation:'допомога/допомагати', example:'Can you help me with this task?', exampleTrans:'Чи можеш допомогти мені з цим завданням?', level:'A1'},
+  {word:'idea', transcr:'aɪˈdɪə', translation:'ідея', example:'I have a good idea for a project.', exampleTrans:'У мене є хороша ідея для проєкту.', level:'A2'},
+  {word:'change', transcr:'tʃeɪndʒ', translation:'зміна/змінювати', example:'People change their minds sometimes.', exampleTrans:'Люди іноді змінюють думку.', level:'A2'},
+  {word:'travel', transcr:'ˈtrævəl', translation:'подорожувати', example:'They want to travel next summer.', exampleTrans:'Вони хочуть подорожувати наступного літа.', level:'A2'},
+  {word:'music', transcr:'ˈmjuːzɪk', translation:'музика', example:'Music makes me calm.', exampleTrans:'Музика заспокоює мене.', level:'A1'},
+  {word:'movie', transcr:'ˈmuːvi', translation:'фільм', example:'We watched a funny movie.', exampleTrans:'Ми подивилися смішний фільм.', level:'A1'},
+  {word:'city', transcr:'ˈsɪti', translation:'місто', example:'The city is very busy.', exampleTrans:'Місто дуже жваве.', level:'A1'},
+  {word:'country', transcr:'ˈkʌntri', translation:'країна', example:'Ukraine is a beautiful country.', exampleTrans:'Україна — красива країна.', level:'A1'},
+  {word:'weather', transcr:'ˈwɛðər', translation:'погода', example:'The weather is sunny today.', exampleTrans:'Погода сьогодні сонячна.', level:'A1'},
+  {word:'breakfast', transcr:'ˈbrɛkfəst', translation:'сніданок', example:'I had toast for breakfast.', exampleTrans:'Я їв тост на сніданок.', level:'A1'},
+  {word:'sleep', transcr:'sliːp', translation:'спати', example:'You should sleep early tonight.', exampleTrans:'Тобі слід сьогодні лягти раніше спати.', level:'A1'}
+];
+
+
+function levenshtein(a, b) {
+  if (!a) return b ? b.length : 0;
+  if (!b) return a.length;
+  a = a.toLowerCase(); b = b.toLowerCase();
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for (let i=0;i<=m;i++) dp[i][0]=i;
+  for (let j=0;j<=n;j++) dp[0][j]=j;
+  for (let i=1;i<=m;i++){
+    for (let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1]?0:1;
+      dp[i][j]=Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost);
+    }
+  }
+  return dp[m][n];
+}
+function fuzzyMatch(a,b,threshold=0.7){
+  if (!a || !b) return false;
+  const d = levenshtein(a.trim(), b.trim());
+  if (d === 0) return true;
+  const len = Math.max(a.trim().length, b.trim().length);
+  const ratio = 1 - d/len;
+  return ratio >= threshold;
+}
+
+
+const wordText = document.getElementById('wordText');
+const wordTranscr = document.getElementById('wordTranscr');
+const wordExample = document.getElementById('wordExample');
+const wordExampleTrans = document.getElementById('wordExampleTrans');
+const wordTranslation = document.getElementById('wordTranslation');
+const speakBtn = document.getElementById('speakBtn');
+const testBtn = document.getElementById('testBtn');
+const repeatBtn = document.getElementById('repeatBtn');
+const showRepeatsBtn = document.getElementById('showRepeats');
+const statsBox = document.getElementById('statsBox');
+const testArea = document.getElementById('testArea');
+const questionsDiv = document.getElementById('questions');
+const submitTest = document.getElementById('submitTest');
+const cancelTest = document.getElementById('cancelTest');
+const resultArea = document.getElementById('resultArea');
+const resetStats = document.getElementById('resetStats');
+const repeatsList = document.getElementById('repeatsList');
+const showAnalysisBtn = document.getElementById('showAnalysisBtn');
+const analysisPanel = document.getElementById('analysisPanel');
+const analysisContent = document.getElementById('analysisContent');
+
+let todayWord = null;
+let currentTest = null;
+let lastAnalysis = [];
+
+
+const STORAGE_KEY = 'wordaday_mvp_v3';
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {tests:0, correct:0, repeats:[]};
+  }catch(e){return {tests:0, correct:0, repeats:[]};}
+}
+function saveState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+let state = loadState();
+function updateStatsUI(){
+  const totalAnswers = state.tests * 2;
+  const pct = totalAnswers ? Math.round(state.correct / totalAnswers * 100) : 0;
+  statsBox.innerHTML = `Тести пройдено: ${state.tests}<br>% правильних відповідей: ${pct}%<br>Слів для повторення: ${state.repeats.length}`;
+  renderRepeats();
+}
+function renderRepeats(){
+  if (!state.repeats.length){ repeatsList.innerHTML = '<div class="muted" style="margin-top:12px">Немає слів для повторення</div>'; return; }
+  repeatsList.innerHTML = '<div class="muted" style="margin-top:12px">Слова для повторення:</div>';
+  const list = document.createElement('div');
+  list.style.marginTop = '8px';
+  state.repeats.forEach(w=>{
+    const el = document.createElement('div');
+    el.textContent = w;
+    el.style.padding = '6px 8px';
+    el.style.border = '1px solid #eef6ff';
+    el.style.borderRadius = '8px';
+    el.style.marginTop = '6px';
+    list.appendChild(el);
+  });
+  repeatsList.appendChild(list);
+}
+
+
+function pickWordOfDay(){
+  const d = new Date();
+  const idx = (d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate()) % WORDS.length;
+  return WORDS[idx];
+}
+function showWord(wordObj){
+  todayWord = wordObj;
+  wordText.textContent = wordObj.word;
+  wordTranscr.textContent = wordObj.transcr ? ('/' + wordObj.transcr + '/') : '';
+  wordExample.textContent = wordObj.example;
+  wordExampleTrans.textContent = wordObj.exampleTrans ? ('Переклад прикладу: ' + wordObj.exampleTrans) : '';
+  wordTranslation.textContent = 'Переклад слова: ' + wordObj.translation;
+}
+speakBtn.addEventListener('click', ()=>{
+  if (!todayWord) return;
+  const ut = new SpeechSynthesisUtterance(todayWord.word);
+  ut.lang = 'en-US';
+  try { window.speechSynthesis.cancel(); } catch(e){}
+  window.speechSynthesis.speak(ut);
+});
+
+
+function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+function generateTest(n=2){
+  const words = shuffle(WORDS);
+  const chosen = words.slice(0, n);
+  const q0 = {kind:'translate', word:chosen[0], prompt:`Перекладіть слово "${chosen[0].word}" українською:`};
+  const choices = shuffle([chosen[1].translation, ...shuffle(WORDS).slice(0,3).map(x=>x.translation)]);
+  const q1 = {kind:'mcq', word:chosen[1], prompt:`Виберіть правильний переклад слова "${chosen[1].word}":`, choices};
+  return [q0, q1];
+}
+
+
+testBtn.addEventListener('click', ()=>startTest());
+function startTest(){
+  currentTest = generateTest(2);
+  questionsDiv.innerHTML = '';
+  analysisPanel.style.display = 'none';
+  showAnalysisBtn.style.display = 'none';
+  lastAnalysis = [];
+  currentTest.forEach((q, idx)=>{
+    const div = document.createElement('div'); div.className='question';
+    const label = document.createElement('div'); label.innerHTML = `<strong>Питання ${idx+1}:</strong> <span class="muted">${q.prompt}</span>`;
+    div.appendChild(label);
+    if (q.kind==='translate'){
+      const inp = document.createElement('input'); inp.type='text'; inp.id = 'ans_'+idx;
+      inp.placeholder = 'Введіть відповідь';
+      div.appendChild(inp);
+    } else if (q.kind==='mcq'){
+      q.choices.forEach((c,ci)=>{
+        const rb = document.createElement('div'); rb.className='opt';
+        rb.innerHTML = `<label><input type="radio" name="q${idx}" value="${c}"> ${c}</label>`;
+        div.appendChild(rb);
+      });
+    }
+    questionsDiv.appendChild(div);
+  });
+  testArea.style.display='block';
+  resultArea.innerHTML='';
+  window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'});
+}
+
+cancelTest.addEventListener('click', ()=>{ testArea.style.display='none'; currentTest=null; });
+
+
+submitTest.addEventListener('click', ()=>{
+  if (!currentTest) return;
+  let correctCount = 0;
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+  lastAnalysis = [];
+  currentTest.forEach((q, idx)=>{
+    let userAns = '';
+    let ok = false;
+    let errorType = null;
+    let detailed = '';
+    if (q.kind==='translate'){
+      const inp = document.getElementById('ans_'+idx);
+      userAns = inp ? inp.value.trim() : '';
+      if (!userAns){
+        errorType = 'Порожня відповідь';
+        detailed = 'Ви нічого не ввели. Спробуйте уважно прочитати слово та приклад і дати переклад.';
+        ok = false;
+      } else if (fuzzyMatch(userAns, q.word.word)){
+        errorType = 'Введено англійське слово замість перекладу';
+        detailed = `Ви ввели англійське слово "${userAns}". Потрібен переклад українською — наприклад: "${q.word.translation}".`;
+        ok = false;
+      } else if (fuzzyMatch(userAns, q.word.translation, 0.6)){
+        errorType = 'Орфографічна помилка (похоже на правильний переклад)';
+        detailed = `Ваша відповідь близька до правильного перекладу "${q.word.translation}". Можливо, є одна-дві літери не на місці.`;
+        ok = true;
+      } else {
+        ok = fuzzyMatch(userAns, q.word.translation);
+        if (!ok){
+          if (/s$/.test(userAns.toLowerCase()) && !q.word.translation.toLowerCase().endsWith('s')){
+            errorType = 'Можлива неправильна форма (множина)';
+            detailed = `Ви могли використати множину або іншу форму. Правильний переклад: "${q.word.translation}".`;
+          } else {
+            errorType = 'Невірний переклад';
+            detailed = `Ваша відповідь "${userAns}" не відповідає значенню слова в прикладі ("${q.word.example}"). Правильна відповідь: "${q.word.translation}".`;
+          }
+        } else {
+          detailed = `Відповідь точна: "${q.word.translation}". Добре!`;
+        }
+      }
+    } else if (q.kind==='mcq'){
+      const chosen = document.querySelector(`input[name="q${idx}"]:checked`);
+      userAns = chosen ? chosen.value : '';
+      if (!userAns){ errorType = 'Нічого не вибрано'; detailed = 'Ви не обрали варіант відповіді.'; ok = false; }
+      else {
+        ok = userAns.toLowerCase().trim() === q.word.translation.toLowerCase().trim();
+        if (!ok){ errorType = 'Обрано невірну відповідь'; detailed = `Ви вибрали "${userAns}". Правильна відповідь: "${q.word.translation}".`; }
+        else { detailed = `Ви правильно вибрали "${q.word.translation}".`; }
+      }
+    }
+
+    const fb = document.createElement('div'); fb.style.marginTop='8px';
+    if (ok){
+      fb.innerHTML = `<div class="correct">Питання ${idx+1}: Правильно ✅</div>`;
+      correctCount++;
+    } else {
+      fb.innerHTML = `<div class="wrong">Питання ${idx+1}: Неправильно ❌</div>`;
+      fb.innerHTML += `<div class="hint"><strong>Тип помилки:</strong> ${errorType || 'Невідомо'}</div>`;
+      fb.innerHTML += `<div class="hint">${detailed}</div>`;
+      if (!state.repeats.includes(q.word.word)) state.repeats.push(q.word.word);
+      if (q.kind==='translate'){
+        const inp = document.getElementById('ans_'+idx);
+        if (inp) inp.classList.add('highlight-wrong');
+      } else if (q.kind==='mcq'){
+        const chosen = document.querySelector(`input[name="q${idx}"]:checked`);
+        if (chosen) chosen.parentElement.classList.add('highlight-wrong');
+        const radios = document.querySelectorAll(`input[name="q${idx}"]`);
+        radios.forEach(r=>{
+          if (r.value.toLowerCase().trim() === q.word.translation.toLowerCase().trim()){
+            r.parentElement.classList.add('highlight-correct');
+          }
+        });
+      }
+    }
+    feedback.appendChild(fb);
+    lastAnalysis.push({
+      question: q.prompt,
+      userAnswer: userAns || '(немає)',
+      correctAnswer: q.word.translation,
+      errorType: errorType || (ok ? 'Правильно' : 'Невірно'),
+      detail: detailed
+    });
+  });
+
+  state.tests += 1;
+  state.correct += correctCount;
+  saveState(state);
+  updateStatsUI();
+
+  resultArea.innerHTML = `<div class="result-line">Результат: ${correctCount} / ${currentTest.length}</div>`;
+  resultArea.appendChild(feedback);
+
+  if (lastAnalysis.length){
+    buildAnalysisContent();
+    showAnalysisBtn.style.display = 'inline-block';
+  } else {
+    showAnalysisBtn.style.display = 'none';
+  }
+  
+  analysisPanel.style.display = 'none';
+  showAnalysisBtn.onclick = ()=>{ analysisPanel.style.display = 'block'; analysisPanel.scrollIntoView({behavior:'smooth', block:'center'}); };
+  currentTest=null;
+  testArea.style.display='none';
+});
+
+
+function buildAnalysisContent(){
+  analysisContent.innerHTML = '';
+  lastAnalysis.forEach((a, i)=>{
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '10px';
+    wrap.innerHTML = `<strong>Питання ${i+1}:</strong> <div class="muted">${a.question}</div>
+      <div style="margin-top:6px"><strong>Ваша відповідь:</strong> ${a.userAnswer}</div>
+      <div style="margin-top:4px"><strong>Правильна відповідь:</strong> ${a.correctAnswer}</div>
+      <div style="margin-top:6px;color:${a.errorType==='Правильно' ? 'var(--good)' : 'var(--bad)'}"><strong>Категорія:</strong> ${a.errorType}</div>
+      <div style="margin-top:6px" class="muted"><strong>Пояснення:</strong> ${a.detail}</div>`;
+    analysisContent.appendChild(wrap);
+  });
+}
+
+
+repeatBtn.addEventListener('click', ()=>{
+  if (!todayWord) return;
+  if (!state.repeats.includes(todayWord.word)) state.repeats.push(todayWord.word);
+  saveState(state); updateStatsUI();
+});
+showRepeatsBtn.addEventListener('click', ()=>{ renderRepeats(); alert('Слова для повторення показані в бічній панелі.'); });
+resetStats.addEventListener('click', ()=>{
+  if (confirm('Скинути локальну статистику?')) {
+    state = {tests:0, correct:0, repeats:[]};
+    saveState(state); updateStatsUI();
+    alert('Статистика очищена.');
+  }
+});
+
+
+showWord(pickWordOfDay());
+updateStatsUI();
+</script>
+</body>
+</html>
